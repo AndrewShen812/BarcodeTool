@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">二维码工具</string>
+    <string name="scanning">扫描</string>
+    <string name="clear">清除</string>
+    <string name="scanningResult">扫描结果</string>
+
+</resources>

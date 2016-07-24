@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/LinearLayout1"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#EEEEEE" >
+
+    <!-- 微信 -->
+
+    <RelativeLayout
+        android:id="@+id/ll_select_dialog_weixin"
+        style="@style/selectDialogItem"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/shape_rect" >
+
+        <ImageView
+            android:id="@+id/iv_select_dialog_send_weixin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="20dp"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/weixin" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="20dp"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/ic_menu_more_clicked" />
+
+        <TextView
+            android:id="@+id/tv_select_dialog_send_weixin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@+id/iv_select_dialog_send_weixin"
+            android:text="微信" />
+    </RelativeLayout>
+
+    <!-- QQ -->
+
+    <RelativeLayout
+        android:id="@+id/ll_select_dialog_qq"
+        style="@style/selectDialogItem"
+        android:background="@drawable/shape_rect" >
+
+        <ImageView
+            android:id="@+id/iv_select_dialog_send_qq"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="20dp"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/qq" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="20dp"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/ic_menu_more_clicked" />
+
+        <TextView
+            android:id="@+id/tv_select_dialog_send_qq"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@+id/iv_select_dialog_send_qq"
+            android:text="QQ" />
+    </RelativeLayout>
+
+    <!-- 微博 -->
+
+    <RelativeLayout
+        android:id="@+id/ll_select_dialog_weibo"
+        style="@style/selectDialogItem"
+        android:background="@drawable/shape_rect" >
+
+        <ImageView
+            android:id="@+id/iv_select_dialog_send_weibo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="20dp"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/weibo" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="20dp"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/ic_menu_more_clicked" />
+
+        <TextView
+            android:id="@+id/tv_select_dialog_send_weibo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@+id/iv_select_dialog_send_weibo"
+            android:text="微博" />
+    </RelativeLayout>
+
+    <!-- 短信 -->
+
+    <RelativeLayout
+        android:id="@+id/ll_select_dialog_sms"
+        style="@style/selectDialogItem"
+        android:layout_marginBottom="5dp"
+        android:background="@drawable/shape_rect" >
+
+        <ImageView
+            android:id="@+id/iv_select_dialog_send_sms"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="20dp"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/sms" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="20dp"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/ic_menu_more_clicked" />
+
+        <TextView
+            android:id="@+id/tv_select_dialog_send_sms"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@+id/iv_select_dialog_send_sms"
+            android:text="短信" />
+    </RelativeLayout>
+
+</LinearLayout>
