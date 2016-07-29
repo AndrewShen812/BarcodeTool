@@ -5,5 +5,7 @@
     <string name="scanning">扫描</string>
     <string name="clear">清除</string>
     <string name="scanningResult">扫描结果</string>
+    <string name="qr_recognising">识别中&#8230;</string>
+    <string name="qr_recognise_fail">无法识别</string>
 
 </resources>

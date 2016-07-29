@@ -10,9 +10,11 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Message;
 import android.os.Vibrator;
 import android.text.TextUtils;
 import android.util.Log;
@@ -27,6 +29,7 @@ import android.widget.Toast;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.Result;
 import com.gwcd.sy.barcodetool.R;
+import com.gwcd.sy.barcodetool.util.FileUtils;
 import com.gwcd.sy.barcodetool.zxing.camera.CameraManager;
 import com.gwcd.sy.barcodetool.zxing.decoding.CaptureActivityHandler;
 import com.gwcd.sy.barcodetool.zxing.decoding.DecodeHandler;
@@ -47,6 +50,8 @@ public class CaptureActivity extends Activity implements Callback {
     public static final int REQUEST_CODE_SELECT_PHOTO = 100;
 
     public static final int REQUEST_CODE_CROP_PHOTO = 101;
+
+    private static final int MSG_DECODE_QR_FINISH = 18001;
 
     private CaptureActivityHandler handler;
 
@@ -73,6 +78,24 @@ public class CaptureActivity extends Activity implements Callback {
     private ImageView mIvAlbum;
 
     private boolean flashOn = false;
+
+    private Handler mDecImgHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
+            if (MSG_DECODE_QR_FINISH == msg.what && msg.getData() != null) {
+                String result = msg.getData().getString("result");
+                if (!TextUtils.isEmpty(result)) {
+                    Intent intent = new Intent();
+                    intent.putExtra("result", result);
+                    setResult(RESULT_OK, intent);
+                    finish();
+                } else {
+                    Toast.makeText(CaptureActivity.this, getString(R.string.qr_recognise_fail), Toast.LENGTH_SHORT).show();
+                }
+            }
+            return true;
+        }
+    });
 
     /**
      * Called when the activity is first created.
@@ -283,7 +306,24 @@ public class CaptureActivity extends Activity implements Callback {
         }
         switch (requestCode) {
             case REQUEST_CODE_SELECT_PHOTO:
-                startCropPicture(data.getData());
+//                startCropPicture(data.getData());
+                Uri mImageCaptureUri = data.getData();
+                if (mImageCaptureUri != null) {
+                    String filePath = null;
+                    if (Build.VERSION.SDK_INT >= 19) {
+                        filePath = FileUtils.getAbsPathFromUri(CaptureActivity.this, mImageCaptureUri);
+                    } else {
+                        filePath = FileUtils.getRealFilePath(CaptureActivity.this, mImageCaptureUri);
+                    }
+                    if (!TextUtils.isEmpty(filePath)) {
+                        Log.d("sy", "filePath:" + filePath);
+                        startDecode(filePath);
+                    } else {
+                        Toast.makeText(CaptureActivity.this, getString(R.string.qr_recognising), Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(CaptureActivity.this, getString(R.string.qr_recognising), Toast.LENGTH_SHORT).show();
+                }
                 break;
             case REQUEST_CODE_CROP_PHOTO:
                 startDecode(BACK_GROUND_SAVED_URI.getPath());
@@ -332,7 +372,6 @@ public class CaptureActivity extends Activity implements Callback {
     public void startCropPicture(Uri paramUri) {
         checkFile();
         Intent localIntent = new Intent("com.android.camera.action.CROP");
-        //localIntent.setClassName("com.android.camera", "com.android.camera.CropImage");
         localIntent.setDataAndType(paramUri, "image/*");
         localIntent.putExtra("crop", "true");
         localIntent.putExtra("scale", true);
@@ -348,25 +387,32 @@ public class CaptureActivity extends Activity implements Callback {
     }
 
     private void startDecode(final String path) {
+        Toast.makeText(CaptureActivity.this, getString(R.string.qr_recognising), Toast.LENGTH_SHORT).show();
         new Thread(new Runnable() {
             @Override
             public void run() {
-                final String result = DecodeHandler.decode(BitmapFactory.decodeFile(path));
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (!TextUtils.isEmpty(result)) {
-                            Intent resultIntent = new Intent();
-                            Bundle bundle = new Bundle();
-                            bundle.putString("result", result);
-                            resultIntent.putExtras(bundle);
-                            CaptureActivity.this.setResult(RESULT_OK, resultIntent);
-                            finish();
-                        } else {
-                            Toast.makeText(CaptureActivity.this, "没有识别到二维码", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+                BitmapFactory.Options localOptions = new BitmapFactory.Options();
+                localOptions.inJustDecodeBounds = true;
+                BitmapFactory.decodeFile(path, localOptions);
+                localOptions.inJustDecodeBounds = false;
+                int sampleSize = (int)(localOptions.outHeight / 200.0F);
+                if (sampleSize <= 0)
+                    sampleSize = 1;
+                localOptions.inSampleSize = sampleSize;
+                Bitmap img = BitmapFactory.decodeFile(path, localOptions);
+                final String result = DecodeHandler.decode(img);
+                if (img != null) {
+                    img.recycle();
+                    img = null;
+                }
+                if (!TextUtils.isEmpty(result)) {
+                    Log.d("sy", "Found barcode:\n" + result);
+                }
+                Message msg = mDecImgHandler.obtainMessage(MSG_DECODE_QR_FINISH);
+                Bundle data = new Bundle();
+                data.putString("result", result);
+                msg.setData(data);
+                mDecImgHandler.sendMessage(msg);
             }
         }).start();
     }
