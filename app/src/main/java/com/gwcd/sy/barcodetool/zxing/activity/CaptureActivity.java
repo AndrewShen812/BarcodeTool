@@ -306,7 +306,6 @@ public class CaptureActivity extends Activity implements Callback {
         }
         switch (requestCode) {
             case REQUEST_CODE_SELECT_PHOTO:
-//                startCropPicture(data.getData());
                 Uri mImageCaptureUri = data.getData();
                 if (mImageCaptureUri != null) {
                     String filePath = null;
@@ -317,16 +316,21 @@ public class CaptureActivity extends Activity implements Callback {
                     }
                     if (!TextUtils.isEmpty(filePath)) {
                         Log.d("sy", "filePath:" + filePath);
-                        startDecode(filePath);
+                        startCropPicture(filePath);
                     } else {
-                        Toast.makeText(CaptureActivity.this, getString(R.string.qr_recognising), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(CaptureActivity.this, getString(R.string.qr_recognise_fail), Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Toast.makeText(CaptureActivity.this, getString(R.string.qr_recognising), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(CaptureActivity.this, getString(R.string.qr_recognise_fail), Toast.LENGTH_SHORT).show();
                 }
                 break;
             case REQUEST_CODE_CROP_PHOTO:
-                startDecode(BACK_GROUND_SAVED_URI.getPath());
+                Bitmap bitmap = data.getParcelableExtra("data");
+                if (bitmap != null) {
+                    startDecode(bitmap);
+                } else {
+                    Toast.makeText(CaptureActivity.this, getString(R.string.qr_recognise_fail), Toast.LENGTH_SHORT).show();
+                }
                 break;
             default:
                 break;
@@ -369,20 +373,25 @@ public class CaptureActivity extends Activity implements Callback {
         }
     }
 
-    public void startCropPicture(Uri paramUri) {
+    public void startCropPicture(String filePath) {
         checkFile();
         Intent localIntent = new Intent("com.android.camera.action.CROP");
-        localIntent.setDataAndType(paramUri, "image/*");
+        /** 创建一个指向需要操作文件（filename）的文件流，可解决无法“加载问题 */
+        localIntent.setDataAndType(Uri.fromFile(new File(filePath)), "image/*");
         localIntent.putExtra("crop", "true");
-        localIntent.putExtra("scale", true);
-        localIntent.putExtra("return-data", false);
-        localIntent.putExtra("output", BACK_GROUND_SAVED_URI);
-        localIntent.putExtra("outputFormat", Bitmap.CompressFormat.JPEG.toString());
+        /**
+         * 这里有两种实现方式：
+         * 1、在onActivityResult中用Intent返回Bitmap
+         * 2、把裁剪后后的图片放到指定路径，裁剪完后去加载图片文件
+         */
+//        localIntent.putExtra("return-data", false);
+//        localIntent.putExtra("output", BACK_GROUND_SAVED_URI);
+//        localIntent.putExtra("outputFormat", Bitmap.CompressFormat.JPEG.toString());
         localIntent.putExtra("aspectX", 1);
         localIntent.putExtra("aspectY", 1);
-        localIntent.putExtra("tips", "随便裁剪一下吧");
-        localIntent.putExtra("actionString", "裁剪完了");
-        localIntent.putExtra("noFaceDetection", true);
+        localIntent.putExtra("outputX", 200);// 输出图片大小
+        localIntent.putExtra("outputY", 200);
+        localIntent.putExtra("return-data", true);
         startActivityForResult(localIntent, REQUEST_CODE_CROP_PHOTO);
     }
 
@@ -404,6 +413,27 @@ public class CaptureActivity extends Activity implements Callback {
                 if (img != null) {
                     img.recycle();
                     img = null;
+                }
+                if (!TextUtils.isEmpty(result)) {
+                    Log.d("sy", "Found barcode:\n" + result);
+                }
+                Message msg = mDecImgHandler.obtainMessage(MSG_DECODE_QR_FINISH);
+                Bundle data = new Bundle();
+                data.putString("result", result);
+                msg.setData(data);
+                mDecImgHandler.sendMessage(msg);
+            }
+        }).start();
+    }
+
+    private void startDecode(final Bitmap img) {
+        Toast.makeText(CaptureActivity.this, getString(R.string.qr_recognising), Toast.LENGTH_SHORT).show();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final String result = DecodeHandler.decode(img);
+                if (img != null) {
+                    img.recycle();
                 }
                 if (!TextUtils.isEmpty(result)) {
                     Log.d("sy", "Found barcode:\n" + result);
